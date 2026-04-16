@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Life Audit Platform{% endblock %}</title>
+    <script src="{{ url_for('static', filename='js/theme-init.js') }}"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/activity.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/analytics.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/suggestions.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/records.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div id="pageLoader" class="page-loader" aria-hidden="true">
+    <div class="loader-spinner" role="status" aria-label="Loading"></div>
+    <div class="loader-text">Loading....</div>
+</div>
+<header class="navbar">
+    <div class="logo" aria-label="Life Audit">
+        <img src="{{ url_for('static', filename='images/life-audit-logo.svg') }}" alt="Life Audit" class="logo-mark">
+        <span class="logo-text">Life Audit</span>
+    </div>
+    {% set on_home = request.endpoint == 'home' %}
+
+    {% if session.get('user_id') %}
+        <button class="nav-menu-toggle" id="navMenuToggle" type="button" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobileMenu">☰</button>
+    {% endif %}
+
+    <nav class="nav-links">
+        {% if session.get('user_id') %}
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+            <a href="{{ url_for('activities') }}">Activities</a>
+            <a href="{{ url_for('goals') }}">Daily Goals</a>
+            <a href="{{ url_for('analytics') }}">Analytics</a>
+            <a href="{{ url_for('suggestions') }}">AI Suggestions</a>
+            <a href="{{ url_for('profile') }}">Profile</a>
+        {% endif %}
+    </nav>
+
+    <div class="nav-auth">
+        {% if session.get('user_id') %}
+            <div class="profile-menu" id="profileMenu">
+                <button class="profile-trigger" id="profileTrigger" type="button" aria-haspopup="true" aria-expanded="false" aria-label="Open profile menu">
+                    {% if current_user and current_user.profile_image %}
+                        <img src="{{ url_for('static', filename=current_user.profile_image) }}" alt="{{ current_user.name }} profile photo" class="profile-trigger-image">
+                    {% else %}
+                        <span class="profile-trigger-initial">{{ current_user.name[:1]|upper if current_user and current_user.name else 'U' }}</span>
+                    {% endif %}
+                </button>
+
+                <div class="profile-dropdown hidden" id="profileDropdown">
+                    <div class="profile-dropdown-header">
+                        <div class="profile-details">
+                            <strong>{{ current_user.name if current_user else 'User' }}</strong>
+                            <span>{{ current_user.email if current_user else '' }}</span>
+                        </div>
+                    </div>
+
+                    <a href="{{ url_for('logout') }}" class="profile-logout-btn">Logout</a>
+                </div>
+
+            </div>
+        {% endif %}
+    </div>
+
+    {% if session.get('user_id') %}
+        <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+            <a href="{{ url_for('home') }}" class="mobile-menu-link">Home</a>
+            <a href="{{ url_for('dashboard') }}" class="mobile-menu-link">Dashboard</a>
+            <a href="{{ url_for('analytics') }}" class="mobile-menu-link">Analytics</a>
+            <a href="{{ url_for('suggestions') }}" class="mobile-menu-link">AI Suggestions</a>
+        </div>
+    {% endif %}
+</header>
+
+{% if not on_home %}
+<div class="mobile-back-row">
+    <button type="button" id="mobileBackBtn" class="mobile-back-btn" aria-label="Go back" data-fallback-url="{{ url_for('dashboard') if session.get('user_id') else url_for('home') }}">← Back</button>
+</div>
+{% endif %}
+
+{% if session.get('user_id') %}
+<nav class="mobile-bottom-nav" aria-label="Mobile quick navigation">
+    <a href="{{ url_for('home') }}" class="mobile-bottom-link"><span class="mobile-nav-icon">🏠</span><span>Home</span></a>
+    <a href="{{ url_for('activities') }}" class="mobile-bottom-link"><span class="mobile-nav-icon">🗂</span><span>Activities</span></a>
+    <a href="{{ url_for('goals') }}" class="mobile-bottom-link"><span class="mobile-nav-icon">🎯</span><span>Daily Goals</span></a>
+    <a href="{{ url_for('profile') }}" class="mobile-bottom-link"><span class="mobile-nav-icon">👤</span><span>Profile</span></a>
+</nav>
+{% endif %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="toast-wrapper">
+            {% for category, message in messages %}
+                <div class="toast toast-{{ category }}" role="status" aria-live="polite">
+                    <div class="toast-dot"></div>
+                    <div class="toast-icon" aria-hidden="true">
+                        {% if category == "success" %}✓{% elif category == "error" or category == "danger" %}!{% elif category == "warning" %}!{% else %}i{% endif %}
+                    </div>
+                    <div class="toast-content">
+                        <p class="toast-message">{{ message }}</p>
+                        <p class="toast-submessage">
+                            {% if category == "success" %}Saved successfully.
+                            {% elif category == "error" or category == "danger" %}Please try again.
+                            {% elif category == "warning" %}Check the details and continue.
+                            {% else %}Information updated.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+    <main class="app-main">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% if session.get('user_id') %}
+    <button id="chatbotToggle" class="chat-toggle" type="button" aria-label="Open AI assistant">AI</button>
+
+    <div id="chatbotBox" class="chatbot-box hidden">
+        <div class="chat-header">
+            <div class="chat-title-wrap">
+                <div class="chat-title">AI Assistant</div>
+                <p>Productivity guidance for your daily routine</p>
+            </div>
+            <button type="button" class="chat-close" id="chatClose" aria-label="Close assistant">x</button>
+        </div>
+
+        <div id="chatMessages" class="chat-messages">
+            <div class="chat-message bot-message">
+                <span class="msg-avatar">AI</span>
+                <div class="msg-bubble">Hello! Ask me about productivity, habits, or improving your daily activity patterns. Sign in for personalized guidance from your activity data.</div>
+            </div>
+        </div>
+
+        <form id="chatForm" class="chat-input">
+            <input type="text" id="userInput" placeholder="Ask AI Assistant" autocomplete="off" />
+            <button id="sendBtn" type="submit">Send</button>
+        </form>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
+    {% endif %}
+    {% block extra_scripts %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/base.js') }}"></script>
+</body>
+</html>
