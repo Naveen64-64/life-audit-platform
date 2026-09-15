@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block title %}Goals - Life Audit Platform{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/goals.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<section class="records-page">
+    <div class="records-box">
+        <div class="records-top">
+            <div>
+                <h1>Daily Goals</h1>
+                <p>Add goals, track progress, and set reminders for them.</p>
+            </div>
+        </div>
+
+        <form method="POST" class="goal-form">
+            <input type="text" name="title" placeholder="Goal title" required>
+            <input type="number" step="0.1" name="target_value" placeholder="Target value" required>
+            <select name="unit" required>
+                <option value="" disabled selected>Select unit</option>
+                {% for unit_option in goal_unit_options %}
+                    <option value="{{ unit_option }}">{{ unit_option|capitalize }}</option>
+                {% endfor %}
+            </select>
+            <input type="time" name="reminder_time" placeholder="Reminder time">
+            <input type="text" name="reminder_message" placeholder="Reminder message (optional)">
+            <button type="submit" class="add-btn">Add Goal</button>
+        </form>
+
+        {% if goals %}
+            <div class="table-wrap">
+                <table class="records-table">
+                    <thead>
+                        <tr>
+                            <th>Goal</th>
+                            <th>Target</th>
+                            <th>Current</th>
+                            <th>Status</th>
+                            <th>Reminder Time</th>
+                            <th>Reminder Message</th>
+                            <th>Update Progress</th>
+                            <th>Delete</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for goal in goals %}
+                        <tr>
+                            <td>{{ goal.title }}</td>
+                            <td>{{ goal.target_value }} {{ goal.unit }}</td>
+                            <td>{{ goal.current_value }} {{ goal.unit }}</td>
+                            <td>
+                                {% if goal.status == "Completed" %}
+                                    <span class="status-badge status-done">Completed</span>
+                                {% else %}
+                                    <span class="status-badge status-pending">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ goal.reminder_time if goal.reminder_time else "-" }}</td>
+                            <td>{{ goal.reminder_message if goal.reminder_message else "-" }}</td>
+                            <td>
+                                <form action="{{ url_for('update_goal', goal_id=goal.id) }}" method="POST" class="goal-update-form">
+                                    <input type="number" step="0.1" name="current_value" placeholder="Current value" required>
+                                    <button type="submit" class="action-btn edit-btn">Update</button>
+                                </form>
+                            </td>
+                            <td>
+                                <form action="{{ url_for('delete_goal', goal_id=goal.id) }}" method="POST">
+                                    <button type="submit" class="action-btn delete-btn" onclick="return confirm('Delete this goal?')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>No goals added yet.</p>
+        {% endif %}
+    </div>
+</section>
+
+<script id="goal-data" type="application/json">
+{{ goals|tojson|safe }}
+</script>
+
+<div id="goalAlarmModal" class="alarm-modal">
+    <div class="alarm-content">
+        <h2>Goal Reminder</h2>
+        <p id="goalAlarmText">It is time for your goal.</p>
+        <button id="stopGoalAlarmBtn" class="stop-alarm-btn">Stop Alarm</button>
+    </div>
+</div>
+
+<audio id="goalAlarmAudio" loop>
+    <source src="{{ url_for('static', filename='audio/goal-reminder.mp3') }}" type="audio/mpeg">
+</audio>
+{% endblock %}

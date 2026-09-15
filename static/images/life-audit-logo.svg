@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Life Audit logo</title>
+  <desc id="desc">Circular clock and growth chart icon in navy and teal.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e9f0f5"/>
+      <stop offset="100%" stop-color="#dbe5ec"/>
+    </linearGradient>
+    <linearGradient id="hill1" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2e76a9"/>
+      <stop offset="100%" stop-color="#2f5797"/>
+    </linearGradient>
+    <linearGradient id="hill2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4ac6ad"/>
+      <stop offset="100%" stop-color="#39b99f"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="8" y="8" width="240" height="240" rx="56" fill="url(#bg)"/>
+
+  <g transform="translate(28,28)">
+    <circle cx="100" cy="100" r="78" fill="#ffffff" stroke="#1a365d" stroke-width="8"/>
+
+    <g stroke="#1a365d" stroke-width="7" stroke-linecap="round">
+      <line x1="100" y1="29" x2="100" y2="41"/>
+      <line x1="49" y1="49" x2="57" y2="57"/>
+      <line x1="29" y1="100" x2="41" y2="100"/>
+      <line x1="49" y1="151" x2="57" y2="143"/>
+      <line x1="151" y1="49" x2="143" y2="57"/>
+      <line x1="171" y1="100" x2="159" y2="100"/>
+    </g>
+
+    <g fill="none" stroke="#1a365d" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="100" y1="100" x2="100" y2="67"/>
+      <line x1="100" y1="100" x2="123" y2="100"/>
+    </g>
+
+    <path d="M36 132 C56 110, 76 108, 100 132 L100 178 L36 178 Z" fill="url(#hill2)" opacity="0.95"/>
+    <path d="M100 132 C120 114, 140 110, 166 128 L166 178 L100 178 Z" fill="url(#hill1)" opacity="0.96"/>
+
+    <g fill="none" stroke="#1a365d" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="44,148 74,120 94,138 126,108 164,108"/>
+      <polyline points="152,95 164,108 151,120"/>
+    </g>
+  </g>
+</svg>

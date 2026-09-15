@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Life Audit Platform{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard-page.css') }}">
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<section class="dashboard-page">
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1>Welcome back, <span class="user-name-highlight">{{ user_name }}!</span></h1>
+            <p class="header-subtitle">Track your daily progress and achieve your goals</p>
+        </div>
+        <div class="dashboard-actions">
+            <a href="{{ url_for('add_activity') }}" class="add-activity-btn">
+                <span class="btn-icon">+</span> Add Activity
+            </a>
+            <a href="{{ url_for('analytics') }}" class="view-analytics-btn">
+                <span class="btn-icon">📊</span> Analytics
+            </a>
+        </div>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Productivity Score - Top Priority -->
+        <div class="dashboard-section productivity-section">
+            <div class="productivity-card shine-effect">
+                <div class="productivity-header">
+                    <h2>Today's Performance</h2>
+                </div>
+                <div class="score-display">
+                    <div class="score-circle-large">
+                        <span class="score-value animation-fade-in">{{ productivity_score }}</span>
+                        <span class="score-unit">%</span>
+                    </div>
+                    <div class="score-details">
+                        <p class="score-label">Productivity Score</p>
+                        <p class="score-description">Based on productive vs total time</p>
+                        <div class="score-rating">
+                            {% if productivity_score >= 80 %}
+                                <span class="rating excellent">Excellent! 🌟</span>
+                            {% elif productivity_score >= 60 %}
+                                <span class="rating good">Good Progress 👍</span>
+                            {% elif productivity_score >= 40 %}
+                                <span class="rating average">Average 📈</span>
+                            {% else %}
+                                <span class="rating low">Keep Trying 💪</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Stats -->
+        <div class="dashboard-section stats-section">
+            <h2>Today's Activity</h2>
+            <div class="stat-item">
+                <div class="stat-header">
+                    <div class="stat-icon-box sleep-bg">😴</div>
+                    <div class="stat-label">Sleep Hours</div>
+                </div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar" data-progress="{{ (avg_sleep / 10 * 100)|round(2) }}"></div>
+                </div>
+                <p class="stat-value-large">{{ "%.1f"|format(avg_sleep) }}<span class="stat-unit"> hrs</span></p>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-header">
+                    <div class="stat-icon-box work-bg">💼</div>
+                    <div class="stat-label">Study/Work Hours</div>
+                </div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar work-bar" data-progress="{{ (avg_work / 12 * 100)|round(2) }}"></div>
+                </div>
+                <p class="stat-value-large">{{ "%.1f"|format(avg_work) }}<span class="stat-unit"> hrs</span></p>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-header">
+                    <div class="stat-icon-box exercise-bg">🏃</div>
+                    <div class="stat-label">Exercise Hours</div>
+                </div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar exercise-bar" data-progress="{{ (avg_exercise / 5 * 100)|round(2) }}"></div>
+                </div>
+                <p class="stat-value-large">{{ "%.1f"|format(avg_exercise) }}<span class="stat-unit"> hrs</span></p>
+            </div>
+
+            <div class="stat-item">
+                <div class="stat-header">
+                    <div class="stat-icon-box mobile-bg">📱</div>
+                    <div class="stat-label">Mobile Usage</div>
+                </div>
+                <div class="stat-bar-container">
+                    <div class="stat-bar mobile-bar" data-progress="{{ (avg_mobile / 8 * 100)|round(2) }}"></div>
+                </div>
+                <p class="stat-value-large">{{ "%.1f"|format(avg_mobile) }}<span class="stat-unit"> hrs</span></p>
+            </div>
+        </div>
+
+        <!-- Goals Progress -->
+        <div class="dashboard-section goals-section">
+            <h2>Daily Goals</h2>
+            {% if goals %}
+                <div class="goals-progress">
+                    <div class="goals-header">
+                        <span class="goals-completed">{{ goals_completed }}/{{ goals|length }}</span>
+                        <span class="goals-text">Completed</span>
+                    </div>
+                    <div class="progress-ring-container">
+                        <svg class="progress-ring" viewBox="0 0 100 100">
+                            <circle class="progress-ring-bg" r="45" cx="50" cy="50"/>
+                            <circle
+                                class="progress-ring-fill"
+                                r="45"
+                                cx="50"
+                                cy="50"
+                                data-goals-completed="{{ goals_completed }}"
+                                data-goals-total="{{ goals|length }}"
+                            />
+                        </svg>
+                        <div class="progress-ring-text">{{ ((goals_completed / goals|length) * 100)|int }}%</div>
+                    </div>
+                    <ul class="goals-list">
+                        {% for goal in goals %}
+                            <li class="goal-item {% if goal.status == 'Completed' %}completed{% endif %}">
+                                <div class="goal-checkbox">
+                                    {% if goal.status == 'Completed' %}✓{% endif %}
+                                </div>
+                                <span class="goal-title">{{ goal.title }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <p class="empty-icon">🎯</p>
+                    <p class="no-goals-message">No goals set yet</p>
+                    <a href="{{ url_for('goals') }}" class="btn-link">Create your first goal</a>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-section actions-section">
+            <h2>Quick Actions</h2>
+            <div class="action-buttons">
+                <a href="{{ url_for('add_activity') }}" class="action-btn primary-btn">
+                    <span class="action-icon">➕</span>
+                    <span class="action-text">Log Activity</span>
+                </a>
+                <a href="{{ url_for('activities') }}" class="action-btn secondary-btn">
+                    <span class="action-icon">📋</span>
+                    <span class="action-text">Activities</span>
+                </a>
+                <a href="{{ url_for('goals') }}" class="action-btn secondary-btn">
+                    <span class="action-icon">🎯</span>
+                    <span class="action-text">Goals</span>
+                </a>
+                <a href="{{ url_for('suggestions') }}" class="action-btn secondary-btn">
+                    <span class="action-icon">💡</span>
+                    <span class="action-text">AI Tips</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Activity Status -->
+        <div class="dashboard-section status-section">
+            <h2>Activity Status</h2>
+            <div class="status-cards">
+                <div class="status-card">
+                    <div class="status-icon">📊</div>
+                    <div class="status-info">
+                        <p class="status-count">{{ total_entries }}</p>
+                        <p class="status-label">Total Logged</p>
+                    </div>
+                </div>
+                <div class="status-card">
+                    <div class="status-icon">📅</div>
+                    <div class="status-info">
+                        <p class="status-count">{{ total_entries }}</p>
+                        <p class="status-label">This Month</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
